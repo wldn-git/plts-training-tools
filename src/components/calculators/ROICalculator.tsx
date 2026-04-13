@@ -25,6 +25,8 @@ import {
   DollarSign, Download
 } from 'lucide-react';
 import { SaveToProjectDialog } from '../ui/save-to-project-dialog';
+import { exportROIToPDF } from '../../lib/utils/pdfExport';
+import { FileText } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -239,7 +241,14 @@ export function ROICalculator() {
       )}
 
       {result && (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => exportROIToPDF(input, result)}
+            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <FileText className="h-4 w-4 mr-2" /> Cetak PDF
+          </Button>
           <Button 
             onClick={() => setShowSaveDialog(true)}
             className="bg-blue-600"

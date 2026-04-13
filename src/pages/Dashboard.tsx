@@ -8,11 +8,31 @@ import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/db';
+import { 
+  Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend 
+} from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, ChartTooltip, ChartLegend);
 
 export function Dashboard() {
   const projectCount = useLiveQuery(() => db.projects.count());
   const lastQuiz = useLiveQuery(() => db.quizAttempts.orderBy('createdAt').reverse().first());
   const calcCount = useLiveQuery(() => db.calculations.count());
+  const projects = useLiveQuery(() => db.projects.toArray());
+
+  const projectDistribution = projects ? {
+    labels: ['On-Grid', 'Off-Grid', 'Hybrid'],
+    datasets: [{
+      data: [
+        projects.filter(p => p.systemType === 'ON_GRID').length,
+        projects.filter(p => p.systemType === 'OFF_GRID').length,
+        projects.filter(p => p.systemType === 'HYBRID').length,
+      ],
+      backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
+      borderWidth: 0,
+    }]
+  } : null;
 
   return (
     <div className="space-y-8">
@@ -98,46 +118,37 @@ export function Dashboard() {
       </div>
 
       {/* Main Tools Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Alat Utama</h2>
-          <Link to="/tools" className="text-blue-600 text-sm font-medium flex items-center hover:underline">
-            Lihat semua <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link to="/calculators/string-config">
-            <Card className="hover:border-blue-300 transition-colors cursor-pointer group">
-              <CardHeader>
-                <Zap className="h-10 w-10 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
-                <CardTitle>String Config</CardTitle>
-                <CardDescription>
-                  Cek kecocokan antara Inverter dan Panel Surya Anda.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold">Komposisi Portfolio</CardTitle>
+              <CardDescription>Berdasarkan jenis sistem yang direncanakan.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center py-6 h-[250px]">
+              {projectDistribution && projects && projects.length > 0 ? (
+                <Pie 
+                  data={projectDistribution}
+                  options={{
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                  }}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <Briefcase className="h-12 w-12 mb-2 opacity-20" />
+                  <p className="text-xs italic">Belum ada data proyek</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          <Link to="/calculators/roi">
-            <Card className="hover:border-blue-300 transition-colors cursor-pointer group">
+          <Link to="/calculators/psh">
+            <Card className="hover:border-blue-300 transition-colors cursor-pointer group h-full">
               <CardHeader>
-                <TrendingUp className="h-10 w-10 text-green-500 mb-2 group-hover:scale-110 transition-transform" />
-                <CardTitle>Kalkulator ROI</CardTitle>
+                <Map className="h-10 w-10 text-cyan-500 mb-2 group-hover:scale-110 transition-transform" />
+                <CardTitle>Peta PSH</CardTitle>
                 <CardDescription>
-                  Hitung penghematan listrik dan masa balik modal (BEP).
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-
-          <Link to="/calculators/battery-sizing">
-            <Card className="hover:border-blue-300 transition-colors cursor-pointer group">
-              <CardHeader>
-                <Battery className="h-10 w-10 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
-                <CardTitle>Sizing Baterai</CardTitle>
-                <CardDescription>
-                  Tentukan kapasitas baterai untuk sistem Hybrid/Off-grid.
+                  Akses data radiasi matahari real-time untuk seluruh wilayah Indonesia.
                 </CardDescription>
               </CardHeader>
             </Card>
