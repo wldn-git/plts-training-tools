@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, Popup, useMap, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { pshData } from '../../lib/data/pshData';
@@ -38,12 +38,6 @@ export function PSHMap() {
   const center: [number, number] = currentData ? [currentData.lat, currentData.lng] : [-2.5489, 118.0149]; // Center of Indonesia
   const zoom = selectedProvince === 'Jakarta' ? 11 : 8;
 
-  const getPshColor = (psh: number) => {
-    if (psh >= 5.5) return 'bg-red-500';
-    if (psh >= 5.0) return 'bg-orange-500';
-    if (psh >= 4.5) return 'bg-yellow-400';
-    return 'bg-blue-400';
-  };
 
   return (
     <div className="space-y-6">
@@ -160,7 +154,7 @@ export function PSHMap() {
                     const circleColor = psh >= 5.5 ? '#ef4444' : psh >= 5.0 ? '#f97316' : psh >= 4.5 ? '#facc15' : '#60a5fa';
                     
                     return (
-                      <div key={prov.province}>
+                      <span key={prov.province}>
                         {/* Glow effect for radiation feel */}
                         <CircleMarker
                           center={[prov.lat, prov.lng]}
@@ -196,7 +190,7 @@ export function PSHMap() {
                             </div>
                           </Popup>
                         </CircleMarker>
-                      </div>
+                      </span>
                     );
                   })}
                 </MapContainer>

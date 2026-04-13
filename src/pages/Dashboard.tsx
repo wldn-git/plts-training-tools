@@ -1,7 +1,7 @@
 import { 
-  Sun, Battery, Zap, TrendingUp, 
-  ArrowRight, HelpCircle,
-  Briefcase, Award, Calculator
+  Sun, Zap, 
+  HelpCircle,
+  Briefcase, Award, Calculator, Map
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -118,6 +118,7 @@ export function Dashboard() {
       </div>
 
       {/* Main Tools Grid */}
+      <div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <Card>
             <CardHeader>

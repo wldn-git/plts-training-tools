@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { ROIInput, ROIOutput } from '../calculations/roi';
+import type { ROIInput, ROIOutput } from '../calculations/roi';
 
 export const exportROIToPDF = (input: ROIInput, result: ROIOutput) => {
   const doc = new jsPDF();
@@ -52,7 +52,7 @@ export const exportROIToPDF = (input: ROIInput, result: ROIOutput) => {
 
   // Table Content
   let y = tableY + 15;
-  result.yearlyData.forEach((row, index) => {
+  result.yearlyData.forEach((row) => {
     // Show only every 5 years to save space, or all if enough space
     if (row.year % 2 === 0 || row.year === 1 || row.year === 25) {
       if (y > 270) {
@@ -63,13 +63,13 @@ export const exportROIToPDF = (input: ROIInput, result: ROIOutput) => {
       doc.setFont('helvetica', 'normal');
       doc.text(row.year.toString(), 20, y);
       doc.text(row.tarif.toLocaleString('id-ID'), 40, y);
-      doc.text(row.production.toFixed(0).toLocaleString('id-ID'), 80, y);
-      doc.text(row.annualSaving.toFixed(0).toLocaleString('id-ID'), 120, y);
+      doc.text(Math.round(row.production).toLocaleString('id-ID'), 80, y);
+      doc.text(Math.round(row.annualSaving).toLocaleString('id-ID'), 120, y);
       
       if (row.net < 0) doc.setTextColor(220, 38, 38);
       else doc.setTextColor(22, 163, 74);
       
-      doc.text(row.net.toFixed(0).toLocaleString('id-ID'), 160, y);
+      doc.text(Math.round(row.net).toLocaleString('id-ID'), 160, y);
       doc.setTextColor(0, 0, 0);
       
       y += 8;

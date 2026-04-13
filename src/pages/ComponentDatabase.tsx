@@ -24,7 +24,6 @@ import { Search, Info, Plus, Trash2, Edit2, Check, Download, Upload } from 'luci
 export function ComponentDatabase() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<{ type: 'PANEL' | 'INVERTER' | 'BATTERY', data: any } | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newType, setNewType] = useState<'PANEL' | 'INVERTER' | 'BATTERY'>('PANEL');
   const [formData, setFormData] = useState<any>({ brand: '', model: '', price: 0 });
@@ -90,7 +89,6 @@ export function ComponentDatabase() {
         else await db.batteries.add(payload);
       }
       setIsDialogOpen(false);
-      setEditingItem(null);
       setFormData({ brand: '', model: '', price: 0 });
     } catch (err) {
       console.error(err);
@@ -100,7 +98,6 @@ export function ComponentDatabase() {
   const startEdit = (type: 'PANEL' | 'INVERTER' | 'BATTERY', item: any) => {
     setNewType(type);
     setFormData({ ...item });
-    setEditingItem({ type, data: item });
     setIsDialogOpen(true);
   };
 
