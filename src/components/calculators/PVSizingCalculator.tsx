@@ -18,17 +18,23 @@ export function PVSizingCalculator() {
   const navigate = useNavigate();
   const [tagihan, setTagihan] = useState<number | ''>('');
   const [tarif, setTarif] = useState<number>(1699);
+  const [systemType, setSystemType] = useState<'ON_GRID' | 'OFF_GRID' | 'HYBRID'>('ON_GRID');
   const [selectedPanelId, setSelectedPanelId] = useState<string>('');
+  const [selectedBatteryId, setSelectedBatteryId] = useState<string>('');
   const [hasil, setHasil] = useState<PVSizingOutput | null>(null);
 
   const solarPanels = useLiveQuery(() => db.solarPanels.toArray()) || [];
+  const batteries = useLiveQuery(() => db.batteries.toArray()) || [];
 
   // Set default panel if available
   useEffect(() => {
     if (solarPanels.length > 0 && !selectedPanelId) {
       setSelectedPanelId(solarPanels[0].id!.toString());
     }
-  }, [solarPanels]);
+    if (batteries.length > 0 && !selectedBatteryId) {
+      setSelectedBatteryId(batteries[0].id!.toString());
+    }
+  }, [solarPanels, batteries]);
 
   const handleCalculate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -37,11 +43,17 @@ export function PVSizingCalculator() {
     const panel = solarPanels.find(p => p.id?.toString() === selectedPanelId);
     if (!panel) return;
 
+    const battery = batteries.find(b => b.id?.toString() === selectedBatteryId);
+
     const input: PVSizingInput = {
       billAmount: Number(tagihan),
       tariff: tarif,
       panelWp: panel.power,
-      panelPrice: panel.price
+      panelPrice: panel.price,
+      systemType,
+      batteryPrice: battery?.price,
+      batteryAh: battery?.capacityAh,
+      batteryVoltage: battery?.voltage as any
     };
 
     const result = calculatePVSizing(input);
@@ -117,6 +129,23 @@ export function PVSizingCalculator() {
               </div>
 
               <div className="space-y-2">
+                <Label>Tipe Sistem PLTS</Label>
+                <Select 
+                  value={systemType}
+                  onValueChange={(val: any) => setSystemType(val)}
+                >
+                  <SelectTrigger className="w-full font-medium">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ON_GRID">On-Grid (Hemat Tagihan)</SelectItem>
+                    <SelectItem value="OFF_GRID">Off-Grid (Mandiri/Tanpa PLN)</SelectItem>
+                    <SelectItem value="HYBRID">Hybrid (On-Grid + Backup)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label>Pilihan Panel Surya</Label>
                 <Select 
                   value={selectedPanelId}
@@ -139,6 +168,32 @@ export function PVSizingCalculator() {
                   </p>
                 )}
               </div>
+
+              {systemType !== 'ON_GRID' && (
+                <div className="space-y-2 animate-in slide-in-from-top-2">
+                  <Label>Pilihan Baterai</Label>
+                  <Select 
+                    value={selectedBatteryId}
+                    onValueChange={setSelectedBatteryId}
+                  >
+                    <SelectTrigger className="w-full font-medium">
+                      <SelectValue placeholder="Pilih Baterai" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {batteries.map(battery => (
+                        <SelectItem key={battery.id} value={battery.id!.toString()}>
+                          {battery.brand} {battery.model} ({battery.capacityKwh}kWh)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedBatteryId && (
+                    <p className="text-[10px] text-gray-500 italic px-1">
+                      Harga DB: Rp {batteries.find(b => b.id?.toString() === selectedBatteryId)?.price.toLocaleString('id-ID')} / unit
+                    </p>
+                  )}
+                </div>
+              )}
 
               <Button 
                 type="submit" 
@@ -217,6 +272,22 @@ export function PVSizingCalculator() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Baterai (Hanya jika sistem Off-grid/Hybrid) */}
+                    {hasil.numBatteries && (
+                      <div className="p-4 border border-purple-100 bg-purple-50/50 rounded-xl flex items-start gap-4 hover:shadow-sm transition-shadow relative overflow-hidden">
+                        <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
+                          <Battery size={24} />
+                        </div>
+                        <div className="z-10">
+                          <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Kebutuhan Baterai</p>
+                          <p className="text-2xl font-black text-gray-900">
+                            {hasil.numBatteries} <span className="text-lg text-gray-400 font-normal">Unit</span>
+                          </p>
+                          <p className="text-[10px] text-purple-700 mt-1 font-medium italic">Total: ±{hasil.batteryRequiredKwh?.toFixed(1)} kWh</p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Investasi */}
                     <div className="p-4 border border-indigo-100 bg-indigo-50/50 rounded-xl flex items-start gap-4 hover:shadow-sm transition-shadow relative overflow-hidden">

@@ -22,11 +22,11 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 };
 
 const RELEVANT_TOOLS = [
+  { title: 'PV Sizing (Tagihan)', desc: 'Estimasi awal cepat dari tagihan listrik PLN', path: '/calculators/pv-sizing', color: 'text-indigo-600', bg: 'bg-indigo-50' },
   { title: 'Kalkulator ROI', desc: 'Hitung investasi, penghematan & payback period', path: '/calculators/roi', color: 'text-green-600', bg: 'bg-green-50' },
   { title: 'String Config', desc: 'Tentukan jumlah panel dan konfigurasi string', path: '/calculators/string-config', color: 'text-blue-600', bg: 'bg-blue-50' },
   { title: 'Sizing Baterai', desc: 'Hitung kapasitas baterai Off-grid/Hybrid', path: '/calculators/battery-sizing', color: 'text-amber-600', bg: 'bg-amber-50' },
   { title: 'Profil Beban', desc: 'Analisa kebutuhan energi harian pelanggan', path: '/calculators/load-profile', color: 'text-orange-600', bg: 'bg-orange-50' },
-  { title: 'Layout Mounting', desc: 'Estimasi luas atap dan tata letak panel', path: '/calculators/mounting', color: 'text-indigo-600', bg: 'bg-indigo-50' },
 ];
 
 export function ProjectPortfolio() {
