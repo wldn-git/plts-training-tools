@@ -192,18 +192,38 @@ export function BatterySizingCalculator() {
                   <CardTitle>Analisa Konfigurasi</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-gray-50 rounded-xl">
-                      <div className="text-gray-500 text-xs mb-1 uppercase tracking-wider">Series</div>
-                      <div className="text-xl font-bold">{result.numSeries}</div>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="flex flex-wrap justify-center gap-4 w-full">
+                      {result.numSeries > 1 && (
+                        <div className="flex-1 min-w-[120px] text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                          <div className="text-gray-500 text-[10px] mb-1 uppercase tracking-wider font-bold">Susunan Seri</div>
+                          <div className="text-xl font-black text-blue-600">{result.numSeries} Unit <span className="text-xs font-normal text-gray-400">/ String</span></div>
+                        </div>
+                      )}
+                      {result.numParallel > 1 && (
+                        <div className="flex-1 min-w-[120px] text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                          <div className="text-gray-500 text-[10px] mb-1 uppercase tracking-wider font-bold">Jumlah Paralel</div>
+                          <div className="text-xl font-black text-blue-600">{result.numParallel} String</div>
+                        </div>
+                      )}
+                      
+                      <div className={`flex-1 min-w-[140px] text-center p-4 rounded-xl border shadow-sm ${result.actualDoD > dod ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                        <div className={`text-[10px] mb-1 uppercase tracking-widest font-black ${result.actualDoD > dod ? 'text-red-600' : 'text-green-600'}`}>Beban Baterai (Actual DoD)</div>
+                        <div className={`text-2xl font-black ${result.actualDoD > dod ? 'text-red-700' : 'text-green-700'}`}>{result.actualDoD}%</div>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-xl">
-                      <div className="text-gray-500 text-xs mb-1 uppercase tracking-wider">Parallel</div>
-                      <div className="text-xl font-bold">{result.numParallel}</div>
-                    </div>
-                    <div className={`text-center p-4 rounded-xl border ${result.actualDoD > dod ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-                      <div className={`text-xs mb-1 uppercase tracking-wider font-bold ${result.actualDoD > dod ? 'text-red-600' : 'text-green-600'}`}>Actual DoD</div>
-                      <div className={`text-xl font-black ${result.actualDoD > dod ? 'text-red-700' : 'text-green-700'}`}>{result.actualDoD}%</div>
+
+                    {/* Human Readable Summary */}
+                    <div className="bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg animate-in zoom-in-95">
+                      {result.numSeries > 1 && result.numParallel > 1 ? (
+                        `Kombinasi: ${result.numSeries} Seri × ${result.numParallel} Paralel`
+                      ) : result.numSeries > 1 ? (
+                        `Hubungkan secara SERI (${result.numSeries} Unit)`
+                      ) : result.numParallel > 1 ? (
+                        `Hubungkan secara PARALEL (${result.numParallel} Unit)`
+                      ) : (
+                        `Pakai 1 Unit Baterai (Tunggal)`
+                      )}
                     </div>
                   </div>
 
