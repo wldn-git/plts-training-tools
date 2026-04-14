@@ -338,7 +338,9 @@ export function PVSizingCalculator() {
                         state: { 
                           investment: hasil.estimatedCost,
                           capacity: hasil.actualKwp,
-                          tariff: tarif
+                          tariff: tarif,
+                          systemType: systemType,
+                          batteryCost: hasil.numBatteries ? (hasil.numBatteries * (batteries.find(b => b.id?.toString() === selectedBatteryId)?.price || 0)) : 0
                         }
                       })}
                       variant="link" 

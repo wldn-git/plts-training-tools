@@ -50,19 +50,24 @@ export function ROICalculator() {
     degradationRate: 0.5,
     selfConsumptionRatio: 80,
     exportCredit: 65,
-    years: 25
+    years: 25,
+    systemType: 'ON_GRID',
+    batteryCost: 0,
+    batteryLifespan: 8
   });
 
   const location = useLocation();
 
   useEffect(() => {
     if (location.state) {
-      const { investment, capacity, tariff } = location.state;
+      const { investment, capacity, tariff, systemType, batteryCost } = location.state;
       setInput(prev => ({
         ...prev,
         investment: investment || prev.investment,
         systemCapacity: capacity || prev.systemCapacity,
-        tarif: tariff || prev.tarif
+        tarif: tariff || prev.tarif,
+        systemType: systemType || prev.systemType,
+        batteryCost: batteryCost || prev.batteryCost
       }));
     }
   }, [location.state]);
@@ -296,6 +301,47 @@ export function ROICalculator() {
             <CardTitle>Parameter Input</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Tipe Sistem</Label>
+              <Select 
+                value={input.systemType} 
+                onValueChange={(v: any) => setInput({...input, systemType: v})}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ON_GRID">On-Grid (PLN)</SelectItem>
+                  <SelectItem value="OFF_GRID">Off-Grid (Baterai)</SelectItem>
+                  <SelectItem value="HYBRID">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {input.systemType !== 'ON_GRID' && (
+              <div className="space-y-3 p-3 bg-amber-50 rounded-lg border border-amber-100 animate-in slide-in-from-top-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Prediksi Ganti Baterai (Rp)</Label>
+                  <Input 
+                    type="number"
+                    value={input.batteryCost}
+                    onChange={e => setInput({...input, batteryCost: Number(e.target.value)})}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Setiap (Tahun)</Label>
+                  <Input 
+                    type="number"
+                    value={input.batteryLifespan}
+                    onChange={e => setInput({...input, batteryLifespan: Number(e.target.value)})}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <p className="text-[9px] text-amber-700 italic leading-tight">
+                  Biaya ini akan mengurangi keuntungan berkala di tahun ke-{input.batteryLifespan}, {Number(input.batteryLifespan)*2}, dst.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Investasi (Rp)</Label>
               <Input

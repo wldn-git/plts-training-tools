@@ -8,6 +8,9 @@ export interface ROIInput {
   selfConsumptionRatio: number; // %
   exportCredit: number; // % of import tariff (default 65)
   years: number;
+  systemType: 'ON_GRID' | 'OFF_GRID' | 'HYBRID';
+  batteryCost?: number; // Biaya penggantian baterai
+  batteryLifespan?: number; // Tahun (misal 8 tahun)
 }
 
 export interface YearlyData {
@@ -31,6 +34,14 @@ export function calculateROI(input: ROIInput): ROIOutput {
   let cumulative = 0;
   let paybackPeriod = input.years;
 
+  const {
+    systemType,
+    batteryCost = 0,
+    batteryLifespan = 8,
+    selfConsumptionRatio,
+    exportCredit
+  } = input;
+
   for (let year = 1; year <= input.years; year++) {
     // Tarif dengan escalasi
     const tarif = input.tarif * Math.pow(1 + input.escalationRate / 100, year - 1);
@@ -40,11 +51,23 @@ export function calculateROI(input: ROIInput): ROIOutput {
                       Math.pow(1 - input.degradationRate / 100, year - 1);
     
     // Saving calculation
-    const selfConsumed = production * (input.selfConsumptionRatio / 100);
-    const exported = production * (1 - input.selfConsumptionRatio / 100);
-    const exportTarif = tarif * (input.exportCredit / 100);
-    
-    const annualSaving = (selfConsumed * tarif) + (exported * exportTarif);
+    let annualSaving = 0;
+
+    if (systemType === 'OFF_GRID') {
+      // Off-grid menghemat 100% produksi (sebagai pengganti biaya PLN)
+      annualSaving = production * tarif;
+    } else {
+      // On-grid atau Hybrid (saat on-grid)
+      const selfConsumed = production * (selfConsumptionRatio / 100);
+      const exported = production * (1 - selfConsumptionRatio / 100);
+      const exportTarif = tarif * (exportCredit / 100);
+      annualSaving = (selfConsumed * tarif) + (exported * exportTarif);
+    }
+
+    // Maintenance Cost: Ganti Baterai (jika ada komponen baterai)
+    if (systemType !== 'ON_GRID' && year > 1 && (year - 1) % batteryLifespan === 0) {
+      annualSaving -= batteryCost;
+    }
     
     cumulative += annualSaving;
     const net = cumulative - input.investment;
