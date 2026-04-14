@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   BookOpen, Sun, Zap, Battery, Shield, 
   Settings, PenTool, Lightbulb, TrendingUp 
