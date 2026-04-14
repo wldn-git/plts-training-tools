@@ -56,15 +56,23 @@ export function Settings() {
       setTimeout(() => setIsResetConfirm(false), 4000);
       return;
     }
-    await db.projects.clear();
-    await db.calculations.clear();
-    await db.quizAttempts.clear();
-    await db.settings.clear();
+    
+    // Clear IndexedDB completely
+    await db.delete();
+    
+    // Clear LocalStorage (Identity & User Data)
+    localStorage.clear();
+    
+    // Reset state just in case
     setCurrency('idr');
     setUnit('mm');
     setDarkMode(false);
     setIsResetConfirm(false);
-    alert('Semua data berhasil direset!');
+    
+    alert('Aplikasi berhasil direset ke pengaturan pabrik. Melakukan reload...');
+    
+    // Force reload to trigger user registration and db re-seed
+    window.location.reload();
   };
 
   const navItems = [
