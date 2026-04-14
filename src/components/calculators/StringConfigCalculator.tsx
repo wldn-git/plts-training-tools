@@ -9,7 +9,7 @@ import { Slider } from '../ui/slider';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription } from '../ui/alert';
-import { CheckCircle2, XCircle, AlertTriangle, Save, Plus } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Save, Plus, LayoutGrid, Maximize2 } from 'lucide-react';
 import { SaveToProjectDialog } from '../ui/save-to-project-dialog';
 
 export function StringConfigCalculator() {
@@ -260,31 +260,54 @@ export function StringConfigCalculator() {
                   ))}
                 </div>
 
-                {/* Visual Diagram */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="text-sm font-medium mb-2">Visual Layout:</div>
-                  <div className="space-y-1">
+                {/* Physical Mounting Layout */}
+                <div className="border rounded-2xl p-6 bg-gray-50/50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm font-bold flex items-center gap-2 text-gray-700">
+                      <LayoutGrid className="h-4 w-4 text-blue-600" />
+                      LAYOUT MOUNTING (ESTIMASI FISIK)
+                    </div>
+                    <Badge variant="outline" className="text-[10px] bg-white">
+                      Tot: {config.totalPanels} Panel
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-6">
                     {Array.from({ length: config.parallel }).map((_, stringIdx) => (
-                      <div key={stringIdx} className="flex gap-1 overflow-x-auto pb-2">
-                        {Array.from({ length: config.series }).map((_, panelIdx) => (
-                          <div 
-                            key={panelIdx}
-                            className={`
-                              min-w-[32px] w-8 h-12 rounded border-2 flex items-center justify-center text-[10px] shrink-0
-                              ${config.isValid 
-                                ? 'bg-green-100 border-green-400' 
-                                : 'bg-red-100 border-red-400'
-                              }
-                            `}
-                          >
-                            {panelIdx + 1}
-                          </div>
-                        ))}
-                        <div className="flex items-center ml-2 text-[10px] text-gray-600 whitespace-nowrap">
-                          String {stringIdx + 1}
+                      <div key={stringIdx} className="space-y-2">
+                        <div className="text-[10px] font-black text-blue-600 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                          STRING {stringIdx + 1}
+                        </div>
+                        <div className="flex flex-wrap gap-2 p-4 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                          {Array.from({ length: config.series }).map((_, panelIdx) => (
+                            <div 
+                              key={panelIdx}
+                              className={`
+                                w-10 h-16 rounded border-2 relative flex items-center justify-center transition-all
+                                ${config.isValid 
+                                  ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                                  : 'bg-red-50 border-red-200'
+                                }
+                              `}
+                            >
+                              <div className="absolute top-1 inset-x-2 h-px bg-blue-200/50"></div>
+                              <div className="absolute top-2 inset-x-2 h-px bg-blue-200/50"></div>
+                              <div className="absolute bottom-2 inset-x-2 h-px bg-blue-200/50"></div>
+                              <span className="text-[8px] font-black text-blue-400">{panelIdx + 1}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t flex justify-between items-center text-[10px] font-bold text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <Maximize2 className="h-3 w-3" />
+                      AREA DIBUTUHKAN: ±{(config.totalPanels * 2.2).toFixed(1)} m²
+                    </div>
+                    <div className="italic text-gray-400">*Susunan dapat berubah di lapangan</div>
                   </div>
                 </div>
 

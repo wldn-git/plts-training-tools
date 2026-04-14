@@ -8,7 +8,7 @@ import { Slider } from '../ui/slider';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
 import { db } from '../../lib/db';
-import { Ruler, Zap, Info, AlertTriangle, CheckCircle2, Save } from 'lucide-react';
+import { Ruler, Zap, Info, AlertTriangle, CheckCircle2, Save, Shield, ShieldAlert } from 'lucide-react';
 
 export function CableSizingCalculator() {
   const [power, setPower] = useState(1000);
@@ -48,9 +48,9 @@ export function CableSizingCalculator() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Kalkulator Ukuran Kabel</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Kabel & Sistem Proteksi</h2>
         <p className="text-gray-600 mt-1">
-          Cegah kebakaran dan kehilangan energi dengan menentukan ukuran kabel yang tepat.
+          Tentukan ukuran kabel dan pengaman (MCB/SPD) yang tepat untuk keamanan sistem.
         </p>
       </div>
 
@@ -160,13 +160,57 @@ export function CableSizingCalculator() {
                         <Zap className="h-6 w-6 text-orange-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Arus Operasi</p>
-                        <p className="text-2xl font-bold">{result.current} Ampere</p>
+                        <p className="text-sm text-gray-500">Arus Operasi (Ib)</p>
+                        <p className="text-2xl font-bold">{result.current} A</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Protection System Card */}
+              <Card className="border-blue-200 border-2 overflow-hidden shadow-lg">
+                <CardHeader className="bg-blue-600 text-white flex flex-row items-center gap-4 py-4">
+                  <Shield className="h-6 w-6" />
+                  <div>
+                    <CardTitle className="text-lg">Sistem Proteksi (Rekomendasi)</CardTitle>
+                    <p className="text-[10px] text-blue-100 uppercase font-bold tracking-widest">Sizing Berdasarkan PUIL / SNI</p>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex gap-4">
+                      <div className="p-3 bg-blue-50 rounded-2xl h-fit">
+                        <ShieldAlert className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase mb-1">Rekomendasi MCB / Fuse</p>
+                        <p className="text-2xl font-black text-gray-900">
+                          {(() => {
+                            const minRating = result.current * 1.25;
+                            const standardRatings = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125];
+                            const recommended = standardRatings.find(r => r >= minRating) || standardRatings[standardRatings.length - 1];
+                            return `${recommended} Ampere`;
+                          })()}
+                        </p>
+                        <p className="text-[10px] text-blue-600 mt-1 font-medium italic">*Safety Factor 1.25x Ib</p>
+                      </div>
+                    </div>
+                    <div className="p-6 flex gap-4">
+                      <div className="p-3 bg-indigo-50 rounded-2xl h-fit">
+                        <Zap className="h-6 w-6 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 font-bold uppercase mb-1">Tipe Proteksi Petir (SPD)</p>
+                        <p className="text-xl font-black text-gray-900">
+                          {voltage <= 48 ? 'SPD DC Type 2 (800V-1000V)' : 'SPD AC Type 2 (275V)'}
+                        </p>
+                        <p className="text-[10px] text-indigo-600 mt-1 font-medium italic">Sistem {voltage <= 100 ? 'DC' : 'AC'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card>
                 <CardHeader>
