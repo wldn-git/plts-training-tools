@@ -26,7 +26,7 @@ export function PVSizingCalculator() {
   // Set default panel if available
   useEffect(() => {
     if (solarPanels.length > 0 && !selectedPanelId) {
-      setSelectedPanelId(solarPanels[0].id!);
+      setSelectedPanelId(solarPanels[0].id!.toString());
     }
   }, [solarPanels]);
 
@@ -34,13 +34,13 @@ export function PVSizingCalculator() {
     if (e) e.preventDefault();
     if (!tagihan) return;
 
-    const panel = solarPanels.find(p => p.id === selectedPanelId);
+    const panel = solarPanels.find(p => p.id?.toString() === selectedPanelId);
     if (!panel) return;
 
     const input: PVSizingInput = {
       billAmount: Number(tagihan),
       tariff: tarif,
-      panelWp: panel.wattPeak,
+      panelWp: panel.power,
       panelPrice: panel.price
     };
 
@@ -127,15 +127,15 @@ export function PVSizingCalculator() {
                   </SelectTrigger>
                   <SelectContent>
                     {solarPanels.map(panel => (
-                      <SelectItem key={panel.id} value={panel.id!}>
-                        {panel.brand} {panel.model} ({panel.wattPeak}Wp)
+                      <SelectItem key={panel.id} value={panel.id!.toString()}>
+                        {panel.brand} {panel.model} ({panel.power}Wp)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {selectedPanelId && (
                   <p className="text-[10px] text-gray-500 italic px-1">
-                    Harga DB: Rp {solarPanels.find(p => p.id === selectedPanelId)?.price.toLocaleString('id-ID')} / lembar
+                    Harga DB: Rp {solarPanels.find(p => p.id?.toString() === selectedPanelId)?.price.toLocaleString('id-ID')} / lembar
                   </p>
                 )}
               </div>
@@ -199,7 +199,9 @@ export function PVSizingCalculator() {
                         <p className="text-2xl font-black text-gray-900">
                           {hasil.numPanels} <span className="text-lg text-gray-400 font-normal">Modul</span>
                         </p>
-                        <p className="text-[10px] text-amber-700 mt-1 font-medium italic">Asumsi Panel 450 Wp</p>
+                        <p className="text-[10px] text-amber-700 mt-1 font-medium italic">
+                          Asumsi Panel {solarPanels.find(p => p.id?.toString() === selectedPanelId)?.power || 450} Wp
+                        </p>
                       </div>
                     </div>
 
@@ -252,7 +254,7 @@ export function PVSizingCalculator() {
                       <div>
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Biaya Panel Saja</p>
                         <p className="text-sm font-bold text-blue-600">
-                          Rp {(hasil.numPanels * (solarPanels.find(p => p.id === selectedPanelId)?.price || 0)).toLocaleString('id-ID')}
+                          Rp {(hasil.numPanels * (solarPanels.find(p => p.id?.toString() === selectedPanelId)?.price || 0)).toLocaleString('id-ID')}
                         </p>
                       </div>
                     </div>
