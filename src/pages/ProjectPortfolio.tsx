@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { db, type Project } from '../lib/db';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
@@ -50,7 +50,6 @@ export function ProjectPortfolio() {
   });
 
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state && location.state.autoCapacity) {
