@@ -131,9 +131,12 @@ export function BatterySizingCalculator() {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2 border-t">
               <div className="flex justify-between">
-                <Label>Desain DoD (Depth of Discharge)</Label>
+                <Label className="flex items-center gap-1">
+                  Desain DoD (Limit Aman)
+                  <Info className="h-3 w-3 text-gray-400" />
+                </Label>
                 <span className="text-sm font-medium">{dod}%</span>
               </div>
               <Slider
@@ -143,6 +146,9 @@ export function BatterySizingCalculator() {
                 max={95}
                 step={5}
               />
+              <p className="text-[10px] text-gray-400 italic">
+                Semakin rendah DoD, semakin awet baterai tapi butuh jumlah lebih banyak.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -166,15 +172,15 @@ export function BatterySizingCalculator() {
                 </Card>
 
                 <Card>
-                  <CardContent className="pt-6 text-gray-900 border-2 border-green-500">
+                  <CardContent className="pt-6 text-gray-900 border-2 border-green-100">
                     <div className="flex items-center gap-4">
                       <div className="bg-green-100 p-3 rounded-full">
                         <Zap className="h-6 w-6 text-green-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Total Kapasitas</p>
+                        <p className="text-sm text-gray-500">Kapasitas Minimum (Target)</p>
                         <p className="text-2xl font-bold">{result.totalCapacityAh} Ah</p>
-                        <p className="text-xs text-gray-400">@ {systemVoltage}V nominal</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Batas Aman {dod}% DoD</p>
                       </div>
                     </div>
                   </CardContent>
@@ -195,28 +201,68 @@ export function BatterySizingCalculator() {
                       <div className="text-gray-500 text-xs mb-1 uppercase tracking-wider">Parallel</div>
                       <div className="text-xl font-bold">{result.numParallel}</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-xl">
-                      <div className="text-gray-500 text-xs mb-1 uppercase tracking-wider">Actual DoD</div>
-                      <div className="text-xl font-bold">{result.actualDoD}%</div>
+                    <div className={`text-center p-4 rounded-xl border ${result.actualDoD > dod ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                      <div className={`text-xs mb-1 uppercase tracking-wider font-bold ${result.actualDoD > dod ? 'text-red-600' : 'text-green-600'}`}>Actual DoD</div>
+                      <div className={`text-xl font-black ${result.actualDoD > dod ? 'text-red-700' : 'text-green-700'}`}>{result.actualDoD}%</div>
                     </div>
                   </div>
 
                   {/* Visual Diagram */}
-                  <div className="border border-dashed p-6 rounded-xl flex flex-col items-center">
-                    <div className="text-sm font-medium mb-4 text-center">Wiring Diagram (Series-Parallel)</div>
-                    <div className="flex gap-4">
+                  <div className="border border-dashed p-8 rounded-xl bg-gray-50/50">
+                    <div className="text-sm font-bold mb-6 text-center text-gray-700 uppercase tracking-widest">Skematik Pengawatan (Wiring)</div>
+                    
+                    <div className="relative flex flex-wrap justify-center gap-12 pt-10 pb-6">
+                      {/* Negative Busbar Line */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-1 bg-blue-500 rounded-full">
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-blue-600">BUSBAR NEGATIF (-)</div>
+                      </div>
+
                       {Array.from({ length: result.numParallel }).map((_, p) => (
-                        <div key={p} className="flex flex-col gap-2 p-3 bg-gray-100 rounded-lg">
+                        <div key={p} className="relative flex flex-col gap-4">
+                          {/* Connection to Negative Busbar */}
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-0.5 h-10 bg-blue-500"></div>
+                          
                           {Array.from({ length: result.numSeries }).map((_, s) => (
-                            <div key={s} className="w-12 h-16 bg-white border-2 border-blue-500 rounded relative shadow-sm flex items-center justify-center">
-                              <div className="absolute -top-1 left-2 w-2 h-1 bg-blue-500"></div>
-                              <div className="absolute -top-1 right-2 w-2 h-1 bg-red-500"></div>
-                              <Battery className="h-6 w-6 text-blue-500" />
+                            <div key={s} className="relative group">
+                              <div className={`
+                                w-20 h-28 bg-white border-2 rounded-xl relative shadow-md flex flex-col items-center justify-center transition-all
+                                ${result.actualDoD > dod ? 'border-red-300 shadow-red-100' : 'border-blue-500 shadow-blue-100'}
+                              `}>
+                                {/* Terminals */}
+                                <div className="absolute -top-2 left-4 w-4 h-3 bg-blue-600 rounded-sm shadow-sm flex items-center justify-center text-[6px] text-white">-</div>
+                                <div className="absolute -top-2 right-4 w-4 h-3 bg-red-600 rounded-sm shadow-sm flex items-center justify-center text-[6px] text-white">+</div>
+                                
+                                <Battery className={`h-10 w-10 ${result.actualDoD > dod ? 'text-red-400' : 'text-blue-500'}`} />
+                                <div className="text-[8px] font-bold mt-2 text-gray-400">UNIT {s + 1}</div>
+                              </div>
+
+                              {/* Series Connection Wire (to next battery) */}
+                              {s < result.numSeries - 1 && (
+                                <div className="flex flex-col items-center">
+                                  <div className="w-1 h-4 bg-gray-400"></div>
+                                  <div className="text-[6px] font-bold text-gray-400 uppercase italic">Seri</div>
+                                </div>
+                              )}
+
+                              {/* Connection to Positive Busbar (last battery in string) */}
+                              {s === result.numSeries - 1 && (
+                                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-0.5 h-10 bg-red-500">
+                                  <div className="absolute bottom-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1/2 left-1/2"></div>
+                                </div>
+                              )}
                             </div>
                           ))}
-                          <div className="text-[10px] text-center font-bold text-gray-500">String {p + 1}</div>
+                          <div className="mt-8 text-center">
+                            <div className="text-[10px] font-black text-gray-900 leading-none">STRING {p + 1}</div>
+                            <div className="text-[8px] text-gray-400 font-medium">({result.numSeries} Seri)</div>
+                          </div>
                         </div>
                       ))}
+
+                      {/* Positive Busbar Line */}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-1 bg-red-500 rounded-full">
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-red-600">BUSBAR POSITIF (+)</div>
+                      </div>
                     </div>
                   </div>
 
