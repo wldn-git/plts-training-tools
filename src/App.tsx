@@ -8,6 +8,7 @@ import { ProjectPortfolio } from './pages/ProjectPortfolio';
 import { Quiz } from './pages/Quiz';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
+import { LearningMaterials } from './pages/LearningMaterials';
 
 // Individual Calculator Pages
 import { StringConfigCalculator } from './components/calculators/StringConfigCalculator';
@@ -64,6 +65,7 @@ function App() {
           <Route path="/projects" element={<ProjectPortfolio />} />
           <Route path="/history" element={<History />} />
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/materi" element={<LearningMaterials />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>

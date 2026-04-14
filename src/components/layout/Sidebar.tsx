@@ -11,6 +11,7 @@ const menuItems = [
   { icon: Database,    label: 'Database Komponen',   path: '/database' },
   { icon: FolderKanban,label: 'Portfolio Project',   path: '/projects' },
   { icon: Clock,       label: 'Riwayat Kalkulasi',   path: '/history' },
+  { icon: BookOpen,    label: 'Materi Edukasi',      path: '/materi' },
   { icon: BookOpen,    label: 'Quiz & Assessment',   path: '/quiz' },
   { icon: Settings,    label: 'Pengaturan',          path: '/settings' },
 ];
