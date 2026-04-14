@@ -55,7 +55,7 @@ export function Dashboard() {
             Bantu klien Anda mendapatkan sistem terbaik dengan data yang akurat.
           </p>
           <div className="mt-6 flex gap-3">
-            <Link to="/calculators">
+            <Link to="/tools">
               <Button className="bg-white text-blue-600 hover:bg-blue-50">
                 Mulai Kalkulasi
               </Button>
