@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   Sun, Zap, 
   HelpCircle,
@@ -20,6 +21,15 @@ export function Dashboard() {
   const lastQuiz = useLiveQuery(() => db.quizAttempts.orderBy('createdAt').reverse().first());
   const calcCount = useLiveQuery(() => db.calculations.count());
   const projects = useLiveQuery(() => db.projects.toArray());
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('plts_user_profile');
+    if (savedUser) {
+      const profile = JSON.parse(savedUser);
+      setUserName(profile.name.split(' ')[0]); // Ambil nama depan saja
+    }
+  }, []);
 
   const projectDistribution = projects ? {
     labels: ['On-Grid', 'Off-Grid', 'Hybrid'],
@@ -39,7 +49,7 @@ export function Dashboard() {
       {/* Welcome Section */}
       <div className="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden">
         <div className="relative z-10 transition-all">
-          <h1 className="text-3xl font-bold">Selamat Datang di PLTS Training Tools</h1>
+          <h1 className="text-3xl font-bold">Selamat Datang, {userName || 'Rekan'}!</h1>
           <p className="mt-2 text-blue-100 max-w-2xl">
             Asisten pintar untuk perencanaan, instalasi, dan pemeliharaan sistem Panel Surya. 
             Bantu klien Anda mendapatkan sistem terbaik dengan data yang akurat.

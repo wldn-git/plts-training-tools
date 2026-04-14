@@ -20,8 +20,27 @@ import { PSHMap } from './components/calculators/PSHMap';
 import { SafetyChecklist } from './components/calculators/SafetyChecklist';
 import { Troubleshooting } from './components/calculators/Troubleshooting';
 import { QuoteGenerator } from './components/calculators/QuoteGenerator';
+import { UserRegistration } from './components/auth/UserRegistration';
+import { useState, useEffect } from 'react';
 
 function App() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('plts_user_profile');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) return null;
+
+  if (!user) {
+    return <UserRegistration onComplete={setUser} />;
+  }
+
   return (
     <BrowserRouter>
       <Layout>
