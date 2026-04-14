@@ -280,7 +280,15 @@ export function PVSizingCalculator() {
                   <div className="mt-8 flex gap-3">
                     <Button 
                       className="flex-1 bg-green-600 hover:bg-green-700 font-bold"
-                      onClick={() => navigate('/projects', { state: { autoCapacity: hasil.actualKwp } })}
+                      onClick={() => navigate('/projects', { 
+                        state: { 
+                          autoCapacity: hasil.actualKwp,
+                          investment: hasil.estimatedCost,
+                          numPanels: hasil.numPanels,
+                          annualSaving: hasil.monthlySaving * 12,
+                          systemType: 'ON_GRID' // Default sizing ini untuk on-grid
+                        } 
+                      })}
                     >
                       <Save className="h-4 w-4 mr-2" /> Simpan sebagai Proyek
                     </Button>

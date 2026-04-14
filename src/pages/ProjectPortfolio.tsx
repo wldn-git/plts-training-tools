@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { db, type Project } from '../lib/db';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -34,6 +35,39 @@ export function ProjectPortfolio() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Project>>({});
   const [showNewModal, setShowNewModal] = useState(false);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [newProject, setNewProject] = useState<Partial<Project>>({
+    name: '',
+    location: '',
+    systemType: 'ON_GRID',
+    status: 'PLANNED',
+    capacity: 0,
+    numPanels: 0,
+    investment: 0,
+    roiYears: 0,
+    annualSaving: 0,
+    createdAt: new Date()
+  });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state && location.state.autoCapacity) {
+      setNewProject(prev => ({
+        ...prev,
+        capacity: location.state.autoCapacity || 0,
+        investment: location.state.investment || 0,
+        roiYears: location.state.roiYears || 0,
+        numPanels: location.state.numPanels || 0,
+        annualSaving: location.state.annualSaving || 0,
+        systemType: location.state.systemType || 'ON_GRID'
+      }));
+      setShowSaveForm(true);
+      // Clear state after reading to prevent modal reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const projects = useLiveQuery(() => db.projects.orderBy('createdAt').reverse().toArray());
 
@@ -68,6 +102,26 @@ export function ProjectPortfolio() {
     const updated = await db.projects.get(selectedProject.id);
     if (updated) setSelectedProject(updated);
     setIsEditing(false);
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProject.name) return;
+    
+    await db.projects.add({
+      ...newProject,
+      createdAt: new Date(),
+    } as Project);
+    
+    setShowSaveForm(false);
+    setNewProject({
+      name: '',
+      location: '',
+      systemType: 'ON_GRID',
+      status: 'PLANNED',
+      capacity: 0,
+      investment: 0,
+      createdAt: new Date()
+    });
   };
 
   return (
@@ -113,6 +167,82 @@ export function ProjectPortfolio() {
             </div>
             <p className="text-[10px] text-gray-400 text-center">Simpan ke Portfolio setelah selesai kalkulasi →</p>
           </div>
+        </div>
+      )}
+ 
+      {/* Save Project Form Modal (Triggered from Calculators) */}
+      {showSaveForm && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <Card className="max-w-md w-full shadow-2xl animate-in zoom-in duration-300">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Simpan Proyek Baru</CardTitle>
+                  <CardDescription>Lengkapi detail proyek dari hasil kalkulasi</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowSaveForm(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nama Proyek</Label>
+                <Input 
+                  placeholder="Contoh: PLTS Atap Bp. Budi"
+                  value={newProject.name}
+                  onChange={e => setNewProject({...newProject, name: e.target.value})}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lokasi</Label>
+                <Input 
+                  placeholder="Contoh: Jakarta Selatan"
+                  value={newProject.location}
+                  onChange={e => setNewProject({...newProject, location: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-[10px] text-blue-600 font-bold uppercase">Kapasitas</p>
+                  <p className="text-lg font-bold text-blue-900">{newProject.capacity} kWp</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <p className="text-[10px] text-green-600 font-bold uppercase">Investasi</p>
+                  <p className="text-lg font-bold text-green-900">
+                    {newProject.investment ? formatCurrency(newProject.investment as number) : '—'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Tipe Sistem</Label>
+                <Select 
+                  value={newProject.systemType} 
+                  onValueChange={(v: any) => setNewProject({...newProject, systemType: v})}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ON_GRID">On-Grid</SelectItem>
+                    <SelectItem value="OFF_GRID">Off-Grid</SelectItem>
+                    <SelectItem value="HYBRID">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+ 
+              <div className="pt-4 flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setShowSaveForm(false)}>Batal</Button>
+                <Button 
+                  className="flex-1 bg-blue-600 font-bold" 
+                  onClick={handleCreateProject}
+                  disabled={!newProject.name}
+                >
+                  Simpan Proyek
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
