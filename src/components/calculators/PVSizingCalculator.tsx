@@ -9,22 +9,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { 
   Calculator as CalcIcon, Sun, Battery, 
   Ruler, Wallet, Save, FileText, ArrowLeft,
-  ArrowRight, TrendingDown
+  ArrowRight, TrendingDown, Layers
 } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../lib/db';
 
 export function PVSizingCalculator() {
   const navigate = useNavigate();
   const [tagihan, setTagihan] = useState<number | ''>('');
   const [tarif, setTarif] = useState<number>(1699);
+  const [selectedPanelId, setSelectedPanelId] = useState<string>('');
   const [hasil, setHasil] = useState<PVSizingOutput | null>(null);
+
+  const solarPanels = useLiveQuery(() => db.solarPanels.toArray()) || [];
+
+  // Set default panel if available
+  useEffect(() => {
+    if (solarPanels.length > 0 && !selectedPanelId) {
+      setSelectedPanelId(solarPanels[0].id!);
+    }
+  }, [solarPanels]);
 
   const handleCalculate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!tagihan) return;
 
+    const panel = solarPanels.find(p => p.id === selectedPanelId);
+    if (!panel) return;
+
     const input: PVSizingInput = {
       billAmount: Number(tagihan),
-      tariff: tarif
+      tariff: tarif,
+      panelWp: panel.wattPeak,
+      panelPrice: panel.price
     };
 
     const result = calculatePVSizing(input);
@@ -97,6 +114,30 @@ export function PVSizingCalculator() {
                     <SelectItem value="1352">Rp 1.352 (R1 - 900 VA Non-Subsidi)</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pilihan Panel Surya</Label>
+                <Select 
+                  value={selectedPanelId}
+                  onValueChange={setSelectedPanelId}
+                >
+                  <SelectTrigger className="w-full font-medium">
+                    <SelectValue placeholder="Pilih Panel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {solarPanels.map(panel => (
+                      <SelectItem key={panel.id} value={panel.id!}>
+                        {panel.brand} {panel.model} ({panel.wattPeak}Wp)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedPanelId && (
+                  <p className="text-[10px] text-gray-500 italic px-1">
+                    Harga DB: Rp {solarPanels.find(p => p.id === selectedPanelId)?.price.toLocaleString('id-ID')} / lembar
+                  </p>
+                )}
               </div>
 
               <Button 
@@ -185,21 +226,40 @@ export function PVSizingCalculator() {
                         <p className="text-2xl font-black text-gray-900">
                           Rp {Math.round(hasil.estimatedCost).toLocaleString('id-ID')}
                         </p>
-                        <div className="mt-2 text-[10px] font-bold text-indigo-700 bg-indigo-100 inline-block px-2 py-0.5 rounded">
-                          Harga Satuan: Rp {hasil.pricePerKwp.toLocaleString('id-ID')} / kWp
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          <div className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">
+                            Rp {hasil.pricePerKwp.toLocaleString('id-ID')} / kWp
+                          </div>
+                          <div className="text-[9px] font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
+                             Sistem All-in
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3">
                       <TrendingDown className="h-5 w-5 text-green-600" />
                       <div>
-                        <p className="text-xs text-gray-500 font-medium">Estimasi Penghematan Tagihan</p>
-                        <p className="text-sm font-bold text-green-600">± Rp {Math.round(hasil.monthlySaving).toLocaleString('id-ID')} / Bulan</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Hemat / Bulan</p>
+                        <p className="text-sm font-bold text-green-600">± Rp {Math.round(hasil.monthlySaving).toLocaleString('id-ID')}</p>
                       </div>
                     </div>
+                    
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3">
+                      <Layers className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Biaya Panel Saja</p>
+                        <p className="text-sm font-bold text-blue-600">
+                          Rp {(hasil.numPanels * (solarPanels.find(p => p.id === selectedPanelId)?.price || 0)).toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end items-center gap-2">
+                    <p className="text-[10px] text-gray-400 italic">Analisa ROI untuk hitungan payback period lebih detil</p>
                     <Button 
                       onClick={() => navigate('/calculators/roi', { 
                         state: { 
@@ -209,7 +269,7 @@ export function PVSizingCalculator() {
                         }
                       })}
                       variant="link" 
-                      className="text-blue-600 text-xs font-bold group"
+                      className="text-blue-600 text-xs font-bold group p-0 h-auto"
                     >
                       Analisa ROI <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </Button>
