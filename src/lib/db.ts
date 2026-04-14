@@ -61,6 +61,8 @@ export interface Project {
   systemType: 'ON_GRID' | 'OFF_GRID' | 'HYBRID';
   capacity: number;      // kWp
   numPanels: number;
+  numBatteries?: number;
+  batteryCapacity?: number; // Total kWh
   investment: number;    // Rupiah
   roiYears: number;
   annualSaving: number;  // Rupiah

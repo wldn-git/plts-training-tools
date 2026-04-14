@@ -59,6 +59,8 @@ export function ProjectPortfolio() {
         investment: location.state.investment || 0,
         roiYears: location.state.roiYears || 0,
         numPanels: location.state.numPanels || 0,
+        numBatteries: location.state.numBatteries || 0,
+        batteryCapacity: location.state.batteryCapacity || 0,
         annualSaving: location.state.annualSaving || 0,
         systemType: location.state.systemType || 'ON_GRID'
       }));
@@ -118,6 +120,9 @@ export function ProjectPortfolio() {
       systemType: 'ON_GRID',
       status: 'PLANNED',
       capacity: 0,
+      numPanels: 0,
+      numBatteries: 0,
+      batteryCapacity: 0,
       investment: 0,
       createdAt: new Date()
     });
@@ -215,20 +220,20 @@ export function ProjectPortfolio() {
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label>Tipe Sistem</Label>
-                <Select 
-                  value={newProject.systemType} 
-                  onValueChange={(v: any) => setNewProject({...newProject, systemType: v})}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ON_GRID">On-Grid</SelectItem>
-                    <SelectItem value="OFF_GRID">Off-Grid</SelectItem>
-                    <SelectItem value="HYBRID">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <Label>Tipe Sistem</Label>
+                  <Select 
+                    value={newProject.systemType} 
+                    onValueChange={(v: any) => setNewProject({...newProject, systemType: v})}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ON_GRID">On-Grid (Hemat Tagihan)</SelectItem>
+                      <SelectItem value="OFF_GRID">Off-Grid (Baterai)</SelectItem>
+                      <SelectItem value="HYBRID">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
  
               <div className="pt-4 flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setShowSaveForm(false)}>Batal</Button>
@@ -399,14 +404,19 @@ export function ProjectPortfolio() {
 
                 {/* Key Stats */}
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: 'Kapasitas', value: `${selectedProject.capacity} kWp`, icon: Zap, color: 'text-amber-500' },
-                    { label: 'Jumlah Panel', value: `${selectedProject.numPanels} unit`, icon: Briefcase, color: 'text-blue-500' },
-                    { label: 'Investasi', value: selectedProject.investment > 0 ? formatCurrency(selectedProject.investment) : '—', icon: DollarSign, color: 'text-green-500' },
-                    { label: 'Penghematan/Thn', value: selectedProject.annualSaving > 0 ? formatCurrency(selectedProject.annualSaving) : '—', icon: TrendingUp, color: 'text-indigo-500' },
-                    { label: 'Payback Period', value: selectedProject.roiYears > 0 ? `${selectedProject.roiYears} Tahun` : '—', icon: Calendar, color: 'text-orange-500' },
-                    { label: 'Tipe Sistem', value: selectedProject.systemType, icon: Zap, color: 'text-cyan-500' },
-                  ].map(item => {
+                    {[
+                      { label: 'Kapasitas', value: `${selectedProject.capacity} kWp`, icon: Zap, color: 'text-amber-500' },
+                      { label: 'Jumlah Panel', value: `${selectedProject.numPanels} unit`, icon: Briefcase, color: 'text-blue-500' },
+                      { label: 'Investasi', value: selectedProject.investment > 0 ? formatCurrency(selectedProject.investment) : '—', icon: DollarSign, color: 'text-green-500' },
+                      { label: 'Penghematan/Thn', value: selectedProject.annualSaving > 0 ? formatCurrency(selectedProject.annualSaving) : '—', icon: TrendingUp, color: 'text-indigo-500' },
+                      { label: 'Payback Period', value: selectedProject.roiYears > 0 ? `${selectedProject.roiYears} Tahun` : '—', icon: Calendar, color: 'text-orange-500' },
+                      { 
+                        label: 'Tipe Sistem', 
+                        value: selectedProject.systemType === 'ON_GRID' ? 'On-Grid' : 
+                               selectedProject.systemType === 'OFF_GRID' ? 'Off-Grid' : 'Hybrid', 
+                        icon: Zap, color: 'text-cyan-500' 
+                      },
+                    ].map(item => {
                     const Icon = item.icon;
                     return (
                       <div key={item.label} className="bg-gray-50 p-3 rounded-xl">

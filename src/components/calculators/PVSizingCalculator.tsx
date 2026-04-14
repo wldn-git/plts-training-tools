@@ -358,8 +358,10 @@ export function PVSizingCalculator() {
                           autoCapacity: hasil.actualKwp,
                           investment: hasil.estimatedCost,
                           numPanels: hasil.numPanels,
+                          numBatteries: hasil.numBatteries || 0,
+                          batteryCapacity: hasil.batteryRequiredKwh || 0,
                           annualSaving: hasil.monthlySaving * 12,
-                          systemType: 'ON_GRID' // Default sizing ini untuk on-grid
+                          systemType: systemType
                         } 
                       })}
                     >
