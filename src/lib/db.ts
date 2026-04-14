@@ -641,6 +641,22 @@ export async function initializeDatabase() {
         correctAnswer: 'C',
         explanation: 'On-Grid terhubung ke jaringan PLN (bisa ekspor-impor), tidak butuh baterai. Off-Grid berdiri sendiri, wajib menggunakan baterai sebagai penyimpan energi.'
       },
+      {
+        category: 'TEORI', difficulty: 'MEDIUM',
+        question: 'Apa yang dimaksud dengan DoD (Depth of Discharge) pada baterai?',
+        optionA: 'Sisa kapasitas baterai', optionB: 'Persentase kapasitas yang telah dikosongkan dari total kapasitas',
+        optionC: 'Kecepatan pengisian baterai', optionD: 'Tegangan maksimum baterai',
+        correctAnswer: 'B',
+        explanation: 'DoD menunjukkan seberapa banyak energi yang sudah diambil dari baterai. Semakin rendah DoD yang digunakan, semakin awet umur siklus baterai tersebut.'
+      },
+      {
+        category: 'TEORI', difficulty: 'MEDIUM',
+        question: 'Teknologi baterai mana yang memiliki jumlah siklus hidup (cycle life) paling lama?',
+        optionA: 'Aki Basah (Lead Acid)', optionB: 'Baterai Gel / VRLA',
+        optionC: 'Lithium Ferro Phosphate (LiFePO4)', optionD: 'Aki Kering MF',
+        correctAnswer: 'C',
+        explanation: 'LiFePO4 (Lithium) saat ini unggul dengan siklus hidup mencapai 6000+ kali, jauh di atas Lead Acid yang hanya sekitar 500-1500 kali.'
+      },
 
       // ===== INSTALASI =====
       {
