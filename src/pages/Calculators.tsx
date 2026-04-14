@@ -1,6 +1,6 @@
 import { 
   Zap, TrendingUp, Battery, Ruler, Layout, 
-  Map, Quote, ListChecks, FileText, Wrench 
+  Map, Quote, ListChecks, FileText, Wrench, Wallet 
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,14 @@ const tools = [
     path: '/calculators/string-config',
     color: 'text-blue-500',
     bgColor: 'bg-blue-50'
+  },
+  {
+    title: 'PV Sizing (Bill)',
+    description: 'Estimasi PLTS dari tagihan listrik bulanan.',
+    icon: Wallet,
+    path: '/calculators/pv-sizing',
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-50'
   },
   {
     title: 'Kalkulator ROI',

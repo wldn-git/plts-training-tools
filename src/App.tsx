@@ -20,6 +20,7 @@ import { PSHMap } from './components/calculators/PSHMap';
 import { SafetyChecklist } from './components/calculators/SafetyChecklist';
 import { Troubleshooting } from './components/calculators/Troubleshooting';
 import { QuoteGenerator } from './components/calculators/QuoteGenerator';
+import { PVSizingCalculator } from './components/calculators/PVSizingCalculator';
 import { UserRegistration } from './components/auth/UserRegistration';
 import { useState, useEffect } from 'react';
 
@@ -57,6 +58,7 @@ function App() {
           <Route path="/calculators/safety" element={<SafetyChecklist />} />
           <Route path="/calculators/troubleshooting" element={<Troubleshooting />} />
           <Route path="/calculators/quote" element={<QuoteGenerator />} />
+          <Route path="/calculators/pv-sizing" element={<PVSizingCalculator />} />
           
           <Route path="/database" element={<ComponentDatabase />} />
           <Route path="/projects" element={<ProjectPortfolio />} />
