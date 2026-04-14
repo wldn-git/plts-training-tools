@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { calculateROI, type ROIInput, type ROIOutput } from '../../lib/calculations/roi';
 import { pshData } from '../../lib/data/pshData';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -51,6 +52,20 @@ export function ROICalculator() {
     exportCredit: 65,
     years: 25
   });
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      const { investment, capacity, tariff } = location.state;
+      setInput(prev => ({
+        ...prev,
+        investment: investment || prev.investment,
+        systemCapacity: capacity || prev.systemCapacity,
+        tarif: tariff || prev.tarif
+      }));
+    }
+  }, [location.state]);
 
   const [result, setResult] = useState<ROIOutput | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);

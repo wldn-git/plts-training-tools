@@ -201,7 +201,13 @@ export function PVSizingCalculator() {
                       </div>
                     </div>
                     <Button 
-                      onClick={() => navigate('/calculators/roi')}
+                      onClick={() => navigate('/calculators/roi', { 
+                        state: { 
+                          investment: hasil.estimatedCost,
+                          capacity: hasil.actualKwp,
+                          tariff: tarif
+                        }
+                      })}
                       variant="link" 
                       className="text-blue-600 text-xs font-bold group"
                     >
