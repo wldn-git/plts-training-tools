@@ -219,35 +219,52 @@ export function BatterySizingCalculator() {
 
                       {Array.from({ length: result.numParallel }).map((_, p) => (
                         <div key={p} className="relative flex flex-col gap-4">
-                          {/* Connection to Negative Busbar */}
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-0.5 h-10 bg-blue-500"></div>
-                          
                           {Array.from({ length: result.numSeries }).map((_, s) => (
                             <div key={s} className="relative group">
                               <div className={`
-                                w-20 h-28 bg-white border-2 rounded-xl relative shadow-md flex flex-col items-center justify-center transition-all
+                                w-24 h-32 bg-white border-2 rounded-xl relative shadow-md flex flex-col items-center justify-center transition-all
                                 ${result.actualDoD > dod ? 'border-red-300 shadow-red-100' : 'border-blue-500 shadow-blue-100'}
                               `}>
                                 {/* Terminals */}
-                                <div className="absolute -top-2 left-4 w-4 h-3 bg-blue-600 rounded-sm shadow-sm flex items-center justify-center text-[6px] text-white">-</div>
-                                <div className="absolute -top-2 right-4 w-4 h-3 bg-red-600 rounded-sm shadow-sm flex items-center justify-center text-[6px] text-white">+</div>
+                                <div className="absolute -top-2 left-5 w-5 h-4 bg-blue-600 rounded-sm shadow-sm flex items-center justify-center text-[8px] text-white font-bold">-</div>
+                                <div className="absolute -top-2 right-5 w-5 h-4 bg-red-600 rounded-sm shadow-sm flex items-center justify-center text-[8px] text-white font-bold">+</div>
                                 
-                                <Battery className={`h-10 w-10 ${result.actualDoD > dod ? 'text-red-400' : 'text-blue-500'}`} />
-                                <div className="text-[8px] font-bold mt-2 text-gray-400">UNIT {s + 1}</div>
+                                <Battery className={`h-12 w-12 ${result.actualDoD > dod ? 'text-red-400' : 'text-blue-500'}`} />
+                                <div className="text-[10px] font-bold mt-2 text-gray-400">UNIT {s + 1}</div>
+
+                                {/* Connection to Negative Busbar (only for the first/top terminal in string) */}
+                                {s === 0 && (
+                                  <div className="absolute -top-10 left-7.5 w-0.5 h-10 bg-blue-500">
+                                    <div className="absolute top-0 w-1.5 h-1.5 bg-blue-500 rounded-full -translate-x-1/2 left-1/2"></div>
+                                  </div>
+                                )}
+
+                                {/* Connection to Positive Busbar (only for the last/bottom terminal in string) */}
+                                {s === result.numSeries - 1 && (
+                                  <>
+                                    {/* Wire that goes from top terminal to bottom busbar */}
+                                    <div className="absolute -top-2 right-7.5 w-0.5 h-[calc(100%+40px)] bg-red-500 -z-10 translate-y-0"></div>
+                                    <div className="absolute -bottom-10 right-7.5 w-0.5 h-10 bg-red-500">
+                                       <div className="absolute bottom-0 w-1.5 h-1.5 bg-red-500 rounded-full -translate-x-1/2 left-1/2"></div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
 
-                              {/* Series Connection Wire (to next battery) */}
+                              {/* Series Connection Wire (Jumper) */}
                               {s < result.numSeries - 1 && (
-                                <div className="flex flex-col items-center">
-                                  <div className="w-1 h-4 bg-gray-400"></div>
-                                  <div className="text-[6px] font-bold text-gray-400 uppercase italic">Seri</div>
-                                </div>
-                              )}
-
-                              {/* Connection to Positive Busbar (last battery in string) */}
-                              {s === result.numSeries - 1 && (
-                                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-0.5 h-10 bg-red-500">
-                                  <div className="absolute bottom-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1/2 left-1/2"></div>
+                                <div className="h-6 relative">
+                                  {/* Wire from + of current to - of next */}
+                                  <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+                                    <path 
+                                      d="M 68 -8 L 68 8 L 26 8 L 26 24" 
+                                      fill="none" 
+                                      stroke="#94a3b8" 
+                                      strokeWidth="2"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                  <div className="text-[8px] absolute left-1/2 -translate-x-1/2 top-1 font-bold text-gray-400 uppercase italic">Seri</div>
                                 </div>
                               )}
                             </div>
