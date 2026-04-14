@@ -268,7 +268,7 @@ export function StringConfigCalculator() {
                       LAYOUT MOUNTING (ESTIMASI FISIK)
                     </div>
                     <Badge variant="outline" className="text-[10px] bg-white">
-                      Tot: {config.totalPanels} Panel
+                      Tot: {config.series * config.parallel} Panel
                     </Badge>
                   </div>
                   
@@ -305,7 +305,7 @@ export function StringConfigCalculator() {
                   <div className="mt-4 pt-4 border-t flex justify-between items-center text-[10px] font-bold text-gray-500">
                     <div className="flex items-center gap-2">
                       <Maximize2 className="h-3 w-3" />
-                      AREA DIBUTUHKAN: ±{(config.totalPanels * 2.2).toFixed(1)} m²
+                      AREA DIBUTUHKAN: ±{(config.series * config.parallel * 2.2).toFixed(1)} m²
                     </div>
                     <div className="italic text-gray-400">*Susunan dapat berubah di lapangan</div>
                   </div>
