@@ -261,7 +261,7 @@ export function Settings() {
               <Globe className="h-4 w-4" />
               PLTS TRAINING TOOLS V1.1 Vercel Edition
             </div>
-            <p className="text-[10px] text-gray-400">© 2026 Antigravity. All rights reserved.</p>
+            <p className="text-[10px] text-gray-400">© 2026 WLDN x Antigravity. All rights reserved.</p>
           </div>
         </div>
       </div>
