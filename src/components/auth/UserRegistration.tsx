@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Zap, ShieldCheck, ArrowRight, Loader2, KeyRound, Mail, Edit3, RotateCcw, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVUSR1zaSNI8XdmAZsS-2oYxuTQqMH2Xowr8A9aZfqUPe4AlICdSnkJVmCIyItozMMuA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYaNpbHokyUXQDPzfCko40Zg9GppkDwQMoLGo4Hgy0mR9bM8AxJ200TG831uLWdhgWRw/exec';
 
 interface UserRegistrationProps {
   onComplete: (user: { name: string; email: string; whatsapp: string }) => void;
