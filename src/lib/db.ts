@@ -98,6 +98,7 @@ export interface QuizQuestion {
 
 export interface QuizAttempt {
   id?: number;
+  category?: string;     // 'TEORI' | 'INSTALASI' | 'SAFETY' | 'TROUBLESHOOTING' | 'BISNIS'
   score: number;         // 0-100
   totalQuestions: number;
   correctAnswers: number;

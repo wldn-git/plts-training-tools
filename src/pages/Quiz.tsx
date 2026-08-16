@@ -30,7 +30,19 @@ export function Quiz() {
     [selectedCategory]
   );
 
-  const attempts = useLiveQuery(() => db.quizAttempts.orderBy('createdAt').reverse().limit(5).toArray());
+  const attempts = useLiveQuery(() => db.quizAttempts.orderBy('createdAt').reverse().limit(10).toArray());
+  const allAttempts = useLiveQuery(() => db.quizAttempts.toArray()) || [];
+
+  // Helper untuk mendapatkan status kuis per kategori
+  const getCategoryStatus = (catName: string) => {
+    const catAttempts = allAttempts.filter(
+      a => a.category === catName || (!a.category && catName === 'TEORI')
+    );
+    if (catAttempts.length === 0) return null;
+    const highestScore = Math.max(...catAttempts.map(a => a.score));
+    const passed = catAttempts.some(a => a.passed);
+    return { highestScore, passed, count: catAttempts.length };
+  };
 
   // Timer logic
   useEffect(() => {
@@ -74,6 +86,7 @@ export function Quiz() {
     const score = Math.round((correctCount / questions.length) * 100);
 
     const attempt: QuizAttempt = {
+      category: selectedCategory || 'TEORI',
       score,
       totalQuestions: questions.length,
       correctAnswers: correctCount,
@@ -94,7 +107,7 @@ export function Quiz() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Quiz & Assessment</h1>
-            <p className="text-gray-600">Uji kemampuan teknis PLTS Anda untuk mendapatkan sertifikasi.</p>
+            <p className="text-gray-600">Uji kemampuan teknis PLTS Anda untuk mendapatkan sertifikasi per modul.</p>
           </div>
           <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200 py-1 px-3">
             Minimal Pass: 80%
@@ -102,50 +115,89 @@ export function Quiz() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((cat) => (
-            <Card key={cat} className="hover:shadow-md transition-shadow cursor-default">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-500" />
-                  {cat}
-                </CardTitle>
-                <CardDescription>Uji pengetahuan tentang {cat.toLowerCase()} panel surya.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={() => startQuiz(cat)} 
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  Mulai Quiz <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {categories.map((cat) => {
+            const status = getCategoryStatus(cat);
+            return (
+              <Card 
+                key={cat} 
+                className={`hover:shadow-lg transition-all duration-300 cursor-default border-2 ${
+                  status?.passed 
+                    ? 'border-green-300 bg-gradient-to-b from-green-50/40 to-white' 
+                    : status 
+                      ? 'border-amber-200 bg-gradient-to-b from-amber-50/20 to-white' 
+                      : 'border-gray-100 hover:border-blue-200'
+                }`}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <BookOpen className={`h-5 w-5 ${status?.passed ? 'text-green-600' : 'text-blue-500'}`} />
+                      {cat}
+                    </CardTitle>
+                    {status?.passed ? (
+                      <Badge className="bg-green-100 text-green-800 border border-green-300 hover:bg-green-100 font-bold px-2 py-0.5 text-xs flex items-center gap-1 shadow-sm">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> LULUS ({status.highestScore}%)
+                      </Badge>
+                    ) : status ? (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 font-medium px-2 py-0.5 text-xs">
+                        Mencoba ({status.highestScore}%)
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <CardDescription className="pt-1">Uji pengetahuan tentang modul {cat.toLowerCase()} panel surya.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={() => startQuiz(cat)} 
+                    className={`w-full font-bold transition-all ${
+                      status?.passed 
+                        ? 'bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/20' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    {status?.passed ? 'Ulangi Quiz Modul' : 'Mulai Quiz'} <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {attempts && attempts.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm uppercase tracking-wider text-gray-500">Riwayat Terakhir</CardTitle>
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm uppercase tracking-wider text-gray-500 font-bold flex items-center gap-2">
+                <Award className="h-4 w-4 text-blue-500" /> Riwayat Pengerjaan Terakhir
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {attempts.map((att) => (
-                  <div key={att.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${att.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        {att.passed ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                {attempts.map((att) => {
+                  const categoryName = att.category || 'TEORI';
+                  return (
+                    <div key={att.id} className="flex items-center justify-between p-3.5 bg-gray-50/80 hover:bg-gray-100/80 transition-colors rounded-xl border border-gray-100">
+                      <div className="flex items-center gap-3.5">
+                        <div className={`p-2.5 rounded-full ${att.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                          {att.passed ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
+                              Modul: {categoryName}
+                            </Badge>
+                            <span className="text-xs text-gray-400">
+                              {att.createdAt.toLocaleDateString('id-ID')} {att.createdAt.toLocaleTimeString('id-ID')}
+                            </span>
+                          </div>
+                          <p className="font-bold text-sm text-gray-900">Score: {att.score}% ({att.correctAnswers}/{att.totalQuestions} Benar)</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-400">{att.createdAt.toLocaleDateString()} {att.createdAt.toLocaleTimeString()}</p>
-                        <p className="font-bold text-sm">Score: {att.score}% ({att.correctAnswers}/{att.totalQuestions})</p>
-                      </div>
+                      <Badge className={att.passed ? "bg-green-600 hover:bg-green-600 text-white font-bold px-3 py-1" : "bg-red-600 hover:bg-red-600 text-white font-bold px-3 py-1"}>
+                        {att.passed ? 'LULUS' : 'GAGAL'}
+                      </Badge>
                     </div>
-                    <Badge variant={att.passed ? "default" : "destructive"}>
-                      {att.passed ? 'LULUS' : 'GAGAL'}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
