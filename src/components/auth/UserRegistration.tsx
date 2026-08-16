@@ -69,6 +69,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
 
     setLoading(true);
     const otpCode = generateRandomOtp();
+    console.log('🔑 [DEMO / DEBUG OTP CODE]:', otpCode);
 
     try {
       // Kirim request ke Google Apps Script (dengan OTP code untuk MailApp.sendEmail)
