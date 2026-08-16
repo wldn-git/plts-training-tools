@@ -214,7 +214,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950 overflow-y-auto select-none relative"
+      className="fixed inset-0 w-full h-full min-h-screen z-50 flex items-center justify-center p-4 bg-slate-950 overflow-y-auto select-none"
     >
       {/* 1. Dynamic Mouse Cursor Spotlight Layer */}
       <div 
