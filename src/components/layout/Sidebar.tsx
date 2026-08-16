@@ -77,8 +77,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             <p className="text-[10px] text-gray-400 font-medium">
               © 2026 Energy Intelligence Suite
             </p>
-            <div className="mt-2 text-[9px] text-gray-400/80 bg-white px-2 py-1 rounded border border-gray-100 w-fit">
-              v1.0.0 Stable Build
+            <div className="mt-2 text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 w-fit">
+              V1.1 Vercel Edition
             </div>
           </div>
         </div>

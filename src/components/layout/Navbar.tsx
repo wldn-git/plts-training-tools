@@ -15,7 +15,7 @@ export function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
         </div>
         
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-gray-600">v1.0.0 Offline</span>
+          <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">V1.1 Vercel Edition</span>
         </div>
       </div>
     </header>

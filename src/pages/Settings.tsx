@@ -259,7 +259,7 @@ export function Settings() {
           <div className="text-center pt-6 opacity-40 space-y-2">
             <div className="flex items-center justify-center gap-2 text-xs font-bold text-gray-400">
               <Globe className="h-4 w-4" />
-              PLTS TRAINING TOOLS v1.0.0
+              PLTS TRAINING TOOLS V1.1 Vercel Edition
             </div>
             <p className="text-[10px] text-gray-400">© 2026 Antigravity. All rights reserved.</p>
           </div>
