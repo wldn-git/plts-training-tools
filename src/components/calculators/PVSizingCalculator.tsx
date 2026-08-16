@@ -14,6 +14,8 @@ import {
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../lib/db';
 
+import { exportPVSizingToPDF } from '../../lib/utils/pdfExport';
+
 export function PVSizingCalculator() {
   const navigate = useNavigate();
   const [tagihan, setTagihan] = useState<number | ''>('');
@@ -25,6 +27,18 @@ export function PVSizingCalculator() {
 
   const solarPanels = useLiveQuery(() => db.solarPanels.toArray()) || [];
   const batteries = useLiveQuery(() => db.batteries.toArray()) || [];
+
+  const handleExportPDF = () => {
+    if (!hasil || !tagihan) return;
+    const panel = solarPanels.find(p => p.id?.toString() === selectedPanelId);
+    const battery = batteries.find(b => b.id?.toString() === selectedBatteryId);
+    exportPVSizingToPDF(
+      { billAmount: Number(tagihan), tariff: tarif, systemType },
+      hasil,
+      panel ? `${panel.brand} ${panel.model} (${panel.power}Wp)` : 'Panel Surya',
+      battery ? `${battery.brand} ${battery.model}` : undefined
+    );
+  };
 
   // Set default panel if available
   useEffect(() => {
@@ -225,7 +239,7 @@ export function PVSizingCalculator() {
                     <CardTitle>Rekomendasi Sistem On-Grid</CardTitle>
                     <CardDescription>Berdasarkan kebutuhan energi harian Anda</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" className="hidden sm:flex border-green-200 text-green-700 hover:bg-green-50">
+                  <Button onClick={handleExportPDF} variant="outline" size="sm" className="hidden sm:flex border-green-200 text-green-700 hover:bg-green-50">
                     <FileText className="h-4 w-4 mr-2" /> Simpan PDF
                   </Button>
                 </CardHeader>

@@ -84,3 +84,103 @@ export const exportROIToPDF = (input: ROIInput, result: ROIOutput) => {
 
   doc.save(`Laporan_ROI_PLTS_${input.systemCapacity}kWp.pdf`);
 };
+
+export const exportPVSizingToPDF = (
+  input: { billAmount: number; tariff: number; systemType: string },
+  result: {
+    actualKwp: number;
+    numPanels: number;
+    roofArea: number;
+    estimatedCost: number;
+    monthlySaving: number;
+    pricePerKwp: number;
+    numBatteries?: number;
+    batteryRequiredKwh?: number;
+  },
+  panelName: string,
+  batteryName?: string
+) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  
+  // Header
+  doc.setFillColor(37, 99, 235); // Blue
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('REKOMENDASI SISTEM PLTS (PV SIZING)', 20, 25);
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, pageWidth - 70, 25);
+
+  // Input Parameter Box
+  doc.setFillColor(243, 244, 246);
+  doc.rect(15, 50, pageWidth - 30, 35, 'F');
+  
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PARAMETER BEBAN & SISTEM', 20, 58);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Tagihan Bulanan: Rp ${input.billAmount.toLocaleString('id-ID')}`, 25, 68);
+  doc.text(`Tarif PLN: Rp ${input.tariff}/kWh`, 25, 75);
+  
+  doc.text(`Tipe Sistem: ${input.systemType}`, 120, 68);
+  doc.text(`Model Panel: ${panelName}`, 120, 75);
+
+  // Results Section
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SPESIFIKASI HASIL PERHITUNGAN', 20, 98);
+
+  const resultsList = [
+    { label: 'Kapasitas Sistem (kWp)', val: `${result.actualKwp.toLocaleString('id-ID')} kWp` },
+    { label: 'Jumlah Modul Panel', val: `${result.numPanels} Modul` },
+    { label: 'Kebutuhan Luas Atap', val: `${result.roofArea.toLocaleString('id-ID')} m²` },
+    { label: 'Estimasi Total Investasi', val: `Rp ${Math.round(result.estimatedCost).toLocaleString('id-ID')}` },
+    { label: 'Estimasi Penghematan / Bulan', val: `± Rp ${Math.round(result.monthlySaving).toLocaleString('id-ID')}` },
+    { label: 'Harga per kWp', val: `Rp ${Math.round(result.pricePerKwp).toLocaleString('id-ID')} / kWp` }
+  ];
+
+  if (result.numBatteries) {
+    resultsList.push({ label: 'Model Baterai', val: batteryName || 'Standard' });
+    resultsList.push({ label: 'Kebutuhan Baterai', val: `${result.numBatteries} Unit (±${result.batteryRequiredKwh?.toFixed(1)} kWh)` });
+  }
+
+  let y = 108;
+  resultsList.forEach((item, idx) => {
+    doc.setFillColor(idx % 2 === 0 ? 249 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 251 : 255);
+    doc.rect(15, y - 5, pageWidth - 30, 9, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.text(item.label, 20, y + 1);
+    doc.setFont('helvetica', 'bold');
+    doc.text(item.val, 130, y + 1);
+    y += 10;
+  });
+
+  // Disclaimer / Note Box
+  y += 10;
+  doc.setFillColor(254, 243, 199); // Amber
+  doc.rect(15, y, pageWidth - 30, 25, 'F');
+  doc.setTextColor(146, 64, 14);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CATATAN TEKNIS:', 20, y + 8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Perhitungan di atas merupakan estimasi awal berdasarkan tarif PLN dan radiasi rata-rata.', 20, y + 14);
+  doc.text('Lakukan survey lokasi nyata untuk kepastian tata letak, shading, dan kapasitas struktur atap.', 20, y + 20);
+
+  // Footer
+  const footerY = doc.internal.pageSize.getHeight() - 15;
+  doc.setFontSize(8);
+  doc.setTextColor(156, 163, 175);
+  doc.text('Dibuat secara otomatis oleh PLTS Training Tools - WLDN Soft', pageWidth / 2, footerY, { align: 'center' });
+
+  doc.save(`Rekomendasi_PLTS_${result.actualKwp}kWp.pdf`);
+};
+

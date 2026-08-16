@@ -57,4 +57,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-chart': ['chart.js', 'react-chartjs-2'],
+          'vendor-map': ['leaflet', 'react-leaflet'],
+          'vendor-pdf': ['jspdf'],
+          'vendor-db': ['dexie', 'dexie-react-hooks'],
+        }
+      }
+    }
+  }
 })

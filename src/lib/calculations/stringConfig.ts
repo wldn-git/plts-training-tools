@@ -31,7 +31,8 @@ export function calculateStringConfig(input: StringConfigInput): StringConfigura
     if (series * parallel !== numPanels) continue;
     
     // Can't exceed number of MPPT inputs
-    if (parallel > inverter.numMppt) continue;
+    const maxMppt = inverter.numMppt && inverter.numMppt > 0 ? inverter.numMppt : 2;
+    if (parallel > maxMppt) continue;
     
     const config: StringConfiguration = {
       series,

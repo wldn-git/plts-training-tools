@@ -39,17 +39,23 @@ export function calculatePVSizing(input: PVSizingInput): PVSizingOutput {
     efficiency = 0.8 
   } = input;
 
-  const monthlyEnergy = billAmount / tariff;
+  const safeTariff = tariff > 0 ? tariff : 1699;
+  const safePanelWp = panelWp > 0 ? panelWp : 450;
+  const safePanelPrice = panelPrice >= 0 ? panelPrice : 0;
+  const safePsh = psh > 0 ? psh : 4.0;
+  const safeEfficiency = efficiency > 0 ? efficiency : 0.8;
+
+  const monthlyEnergy = billAmount / safeTariff;
   const dailyEnergy = monthlyEnergy / 30;
 
   // 1. Hitung Kapasitas Target (kWp)
   // Untuk Off-grid biasanya butuh kapasitas lebih besar karena murni dari surya
   const safetyFactor = systemType === 'OFF_GRID' ? 1.4 : 1.2;
-  const targetKwp = (dailyEnergy * safetyFactor) / (psh * efficiency);
+  const targetKwp = (dailyEnergy * safetyFactor) / (safePsh * safeEfficiency);
   
   // 2. Hitung Jumlah Panel berdasarkan Wp pilihan
-  const numPanels = Math.ceil((targetKwp * 1000) / panelWp);
-  const actualKwp = (numPanels * panelWp) / 1000;
+  const numPanels = Math.ceil((targetKwp * 1000) / safePanelWp);
+  const actualKwp = (numPanels * safePanelWp) / 1000;
   
   // 3. LOGIKA BIAYA NYATA (HARGA PANEL + OVERHEAD SISTEM)
   let bosMultiplier = 1.3; 
@@ -60,7 +66,7 @@ export function calculatePVSizing(input: PVSizingInput): PVSizingOutput {
   else if (actualKwp > 10) bosMultiplier -= 0.2;
 
   // Biaya Panel Total
-  const panelTotalCost = numPanels * panelPrice;
+  const panelTotalCost = numPanels * safePanelPrice;
   // Biaya Infrastruktur Inverter, Mounting, Jasa (Estimasi)
   const bosCost = panelTotalCost * bosMultiplier;
   
@@ -72,14 +78,16 @@ export function calculatePVSizing(input: PVSizingInput): PVSizingOutput {
   if (systemType !== 'ON_GRID') {
     // Estimasi backup 1 hari
     batteryRequiredKwh = dailyEnergy * 1.2; // 20% Buffer
-    const kwhPerBattery = (batteryVoltage * batteryAh) / 1000;
-    numBatteries = Math.ceil(batteryRequiredKwh / kwhPerBattery);
-    totalBatteryCost = numBatteries * batteryPrice;
+    const safeBatteryVolt = batteryVoltage && batteryVoltage > 0 ? batteryVoltage : 48;
+    const safeBatteryAh = batteryAh && batteryAh > 0 ? batteryAh : 100;
+    const kwhPerBattery = (safeBatteryVolt * safeBatteryAh) / 1000;
+    numBatteries = kwhPerBattery > 0 ? Math.ceil(batteryRequiredKwh / kwhPerBattery) : 0;
+    totalBatteryCost = numBatteries * (batteryPrice || 0);
   }
 
   // Total Investasi
   const estimatedCost = panelTotalCost + bosCost + totalBatteryCost;
-  const pricePerKwp = estimatedCost / actualKwp;
+  const pricePerKwp = actualKwp > 0 ? estimatedCost / actualKwp : 0;
 
   const roofArea = numPanels * 2.2; 
   const monthlySaving = systemType === 'ON_GRID' ? billAmount * 0.85 : billAmount; // Off-grid hemat 100% tagihan
