@@ -72,22 +72,20 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     console.log('🔑 [DEMO / DEBUG OTP CODE]:', otpCode);
 
     try {
-      // Kirim request ke Google Apps Script (dengan OTP code untuk MailApp.sendEmail)
+      // Kirim request ke Google Apps Script via URLSearchParams (Form Encoded)
+      const params = new URLSearchParams();
+      params.append('action', 'send_otp');
+      params.append('name', formData.name);
+      params.append('email', formData.email);
+      params.append('whatsapp', formData.whatsapp);
+      params.append('otp', otpCode);
+      params.append('userAgent', navigator.userAgent);
+      params.append('timestamp', new Date().toISOString());
+
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'send_otp',
-          name: formData.name,
-          email: formData.email,
-          whatsapp: formData.whatsapp,
-          otp: otpCode,
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString()
-        }),
+        body: params,
       });
     } catch (err) {
       console.error('Apps Script fetch failed:', err);
@@ -153,21 +151,18 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     setLoading(true);
 
     try {
-      // Log verified user registration to Google Sheets
+      const params = new URLSearchParams();
+      params.append('action', 'verified_registration');
+      params.append('name', formData.name);
+      params.append('email', formData.email);
+      params.append('whatsapp', formData.whatsapp);
+      params.append('status', 'VERIFIED');
+      params.append('timestamp', new Date().toISOString());
+
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'verified_registration',
-          name: formData.name,
-          email: formData.email,
-          whatsapp: formData.whatsapp,
-          status: 'VERIFIED',
-          timestamp: new Date().toISOString()
-        }),
+        body: params,
       });
     } catch (err) {
       console.error('Error logging verified user:', err);
@@ -185,20 +180,21 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     setErrorMsg(null);
     setLoading(true);
     const newOtp = generateRandomOtp();
+    console.log('🔑 [DEMO / DEBUG RESENT OTP CODE]:', newOtp);
 
     try {
+      const params = new URLSearchParams();
+      params.append('action', 'resend_otp');
+      params.append('name', formData.name);
+      params.append('email', formData.email);
+      params.append('whatsapp', formData.whatsapp);
+      params.append('otp', newOtp);
+      params.append('timestamp', new Date().toISOString());
+
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'resend_otp',
-          email: formData.email,
-          otp: newOtp,
-          timestamp: new Date().toISOString()
-        }),
+        body: params,
       });
     } catch (err) {
       console.error('Resend OTP error:', err);
