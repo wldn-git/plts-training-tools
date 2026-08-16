@@ -18,10 +18,22 @@ ChartJS.register(ArcElement, ChartTooltip, ChartLegend);
 
 export function Dashboard() {
   const projectCount = useLiveQuery(() => db.projects.count());
-  const lastQuiz = useLiveQuery(() => db.quizAttempts.orderBy('createdAt').reverse().first());
+  const allAttempts = useLiveQuery(() => db.quizAttempts.toArray()) || [];
   const calcCount = useLiveQuery(() => db.calculations.count());
   const projects = useLiveQuery(() => db.projects.toArray());
   const [userName, setUserName] = useState('');
+
+  const categoriesList = ['TEORI', 'INSTALASI', 'SAFETY', 'TROUBLESHOOTING', 'BISNIS'];
+  
+  // Hitung berapa modul yang sudah lulus (skor >= 80%)
+  const passedCategoriesCount = categoriesList.filter(cat => {
+    return allAttempts.some(a => (a.category === cat || (!a.category && cat === 'TEORI')) && a.passed);
+  }).length;
+
+  // Hitung rata-rata total persentase keberhasilan kuis
+  const avgScore = allAttempts.length > 0
+    ? Math.round(allAttempts.reduce((acc, curr) => acc + curr.score, 0) / allAttempts.length)
+    : 0;
 
   useEffect(() => {
     const savedUser = localStorage.getItem('plts_user_profile');
@@ -85,17 +97,23 @@ export function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 text-gray-500">
-            <CardTitle className="text-[10px] font-bold uppercase tracking-wider">Score Quiz Terakhir</CardTitle>
-            <Award className="h-4 w-4" />
+            <CardTitle className="text-[10px] font-bold uppercase tracking-wider">Progres Assessment</CardTitle>
+            <Award className={`h-4 w-4 ${passedCategoriesCount > 0 ? 'text-blue-600' : 'text-gray-400'}`} />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-black ${lastQuiz?.passed ? 'text-green-600' : 'text-amber-600'}`}>
-              {lastQuiz ? `${lastQuiz.score}%` : '---'}
+            <div className={`text-2xl font-black ${passedCategoriesCount === 5 ? 'text-green-600' : passedCategoriesCount > 0 ? 'text-blue-600' : 'text-gray-700'}`}>
+              {passedCategoriesCount}/5 <span className="text-sm font-bold text-gray-500">Modul Lulus</span>
             </div>
-            <p className="text-[10px] text-gray-400 mt-1 uppercase">
-              {lastQuiz ? (lastQuiz.passed ? 'LULUS' : 'BELUM LULUS') : 'BELUM ADA DATA'}
+            <p className="text-[10px] font-bold mt-1 uppercase text-gray-500">
+              {allAttempts.length > 0 ? (
+                <span className={avgScore >= 80 ? "text-green-600" : "text-amber-600"}>
+                  RATA-RATA AKURASI: {avgScore}%
+                </span>
+              ) : (
+                'BELUM ADA QUIZ'
+              )}
             </p>
           </CardContent>
         </Card>
