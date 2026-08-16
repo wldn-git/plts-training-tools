@@ -28,8 +28,13 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
   const [timer, setTimer] = useState<number>(60);
   const [canResend, setCanResend] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -207,19 +212,43 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/95 backdrop-blur-md overflow-y-auto">
-      <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
+    <div 
+      onMouseMove={handleMouseMove}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950 overflow-y-auto select-none relative"
+    >
+      {/* 1. Dynamic Mouse Cursor Spotlight Layer */}
+      <div 
+        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(650px circle at ${mousePos.x}px ${mousePos.y}px, rgba(37, 99, 235, 0.22), rgba(79, 70, 229, 0.12) 40%, transparent 80%)`
+        }}
+      />
+
+      {/* 2. Floating Animated Gradient Orbs */}
+      <div className="pointer-events-none absolute top-10 left-10 w-96 h-96 bg-blue-600/30 rounded-full blur-[120px] animate-pulse" />
+      <div className="pointer-events-none absolute bottom-10 right-10 w-[30rem] h-[30rem] bg-indigo-600/20 rounded-full blur-[140px] animate-pulse duration-1000" />
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-500/15 rounded-full blur-[100px]" />
+
+      {/* 3. Tech Grid Overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#3b82f61a_1px,transparent_1px)] [background-size:28px_28px] opacity-70" />
+
+      {/* Main Registration Content Container */}
+      <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in duration-500">
         
         {/* Header Branding */}
         <div className="flex flex-col items-center mb-6 text-white">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-xl shadow-blue-500/20 rotate-3">
-            <Zap className="h-7 w-7 text-white fill-white" />
+          <div className="w-16 h-16 bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center mb-3 shadow-2xl shadow-blue-500/40 rotate-3 hover:rotate-6 transition-all duration-300 hover:scale-105 cursor-pointer">
+            <Zap className="h-8 w-8 text-white fill-white animate-bounce" />
           </div>
-          <h1 className="text-xl font-black tracking-tight uppercase">PLTS Training Tools</h1>
-          <p className="text-slate-400 text-xs mt-0.5">Otentikasi Akun & Akses Simulator</p>
+          <h1 className="text-2xl font-black tracking-tight uppercase bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-blue-200">
+            PLTS Training Tools
+          </h1>
+          <p className="text-blue-300/80 text-xs font-medium mt-0.5 tracking-wide">
+            Otentikasi Akun & Akses Simulator
+          </p>
         </div>
 
-        <Card className="border-0 shadow-2xl overflow-hidden">
+        <Card className="border border-slate-800 hover:border-blue-500/40 shadow-[0_0_50px_-12px_rgba(37,99,235,0.3)] transition-all duration-500 backdrop-blur-xl bg-white/95 overflow-hidden">
           {step === 'REGISTER' ? (
             <>
               <CardHeader className="space-y-1 pt-6 pb-4">
